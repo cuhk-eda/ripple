@@ -215,7 +215,6 @@ bool Database::readDEF(const std::string& file) {
     defrSetAddPathToNet();
 
     defrSetRegionCbk(readDefRegion);
-    //  defrSetGroupNameCbk(readDefGroupName);
     defrSetGroupMemberCbk(readDefGroupMember);
     defrSetGroupCbk(readDefGroup);
 
@@ -233,124 +232,12 @@ bool Database::readDEF(const std::string& file) {
 }
 
 bool Database::readDEFPG(const std::string& file) {
-    //  shape of pre-routed PG mesh is not supported by the reader
-    string buffer;
-    ifstream ifs(file.c_str());
-    if (!ifs.good()) {
-        printlog(LOG_ERROR, "Unable to open DEF PG file: %s", file.c_str());
-        return false;
-    }
-
-#ifndef NDEBUG
-    printlog(LOG_INFO, "reading %s", file.c_str());
-#endif
-
-    Database* db = &database;
-    int n_snets = 0;
-
-    //  ignore lines until the keyword
-    do {
-        ifs >> buffer;
-        if (buffer == "SPECIALNETS") {
-            ifs >> n_snets >> buffer;
-            break;
-        }
-    } while (!ifs.eof());
-
-    for (int i = 0; i < n_snets; i++) {
-        //  SNet* snet = NULL;
-        do {
-            ifs >> buffer;
-            if (buffer == "-") {
-                string snetname;
-                ifs >> snetname;
-                // snet = db->addSNet(snetname);
-            }
-            if (buffer == "ROUTED" || buffer == "NEW") {
-                string layername;
-                int wirewidth;
-                string vianame;
-                string shape;
-                char direction;
-                int fx, fy;
-                //  int tx, ty;
-                string tx_str, ty_str;
-                ifs >> layername >> wirewidth;
-                if (wirewidth == 0) {
-                    // via
-                    ifs >> buffer >> buffer >> shape >> buffer >> fx >> fy >> buffer >> vianame;
-                    ViaType* viatype = db->getViaType(vianame);
-                    if (!viatype) {
-                        printlog(LOG_ERROR, "Via type is not defined: %s", vianame.c_str());
-                        return false;
-                    }
-                    //  snet->addVia(viatype, fx, fy);
-                } else {
-                    // wire
-                    ifs >> buffer >> buffer >> shape >> buffer >> fx >> fy >> buffer >> buffer >> tx_str >> ty_str >>
-                        buffer;
-                    if (tx_str == "*") {
-                        //  tx = fx;
-                    } else {
-                        //  tx = atoi(tx_str.c_str());
-                    }
-                    if (ty_str == "*") {
-                        //  ty = fy;
-                    } else {
-                        //  ty = atoi(ty_str.c_str());
-                    }
-                    //  if (tx == fx) {
-                    //      direction = 'v';
-                    //  } else {
-                    //      direction = 'h';
-                    //  }
-                    Layer* layer = db->getLayer(layername);
-                    if (!layer) {
-                        printlog(LOG_ERROR, "Layer is not defined: %s", layername.c_str());
-                        return false;
-                    }
-                    //  int lx, ly, hx, hy;
-                    if (direction == 'h') {
-                        //  lx = min(fx, tx);
-                        //  ly = fy - wirewidth / 2;
-                        //  hx = max(fx, tx);
-                        //  hy = ly + wirewidth;
-                    } else {
-                        //  lx = fx - wirewidth / 2;
-                        //  ly = min(fy, ty);
-                        //  hx = lx + wirewidth;
-                        //  hy = max(fy, ty);
-                    }
-                    //  snet->addShape(*layer, lx, ly, hx, hy);
-                    if ((layer->rIndex == 0 || layer->rIndex == 1) && direction == 'h') {
-                        //  db->powerNet.addRail(snet, lx, hx, fy);
-                    }
-                }
-            }
-            if (buffer == "USE") {
-                string type;
-                ifs >> type;
-                if (type == "POWER") {
-                    //  snet->type = 'p';
-                } else if (type == "GROUND") {
-                    //  snet->type = 'g';
-                } else {
-                    printlog(LOG_ERROR, "unknown use: %s", type.c_str());
-                }
-            }
-            if (buffer == ";") {
-                break;
-            }
-        } while (!ifs.eof());
-    }
-    ifs.close();
     return true;
 }
 
 bool Database::writeComponents(ofstream& ofs) {
     int nCells = cells.size();
     ofs << "COMPONENTS " << nCells << " ;" << endl;
-    // ofs << "COMPONENTS " << nCells << " ;" << endl;
     for (int i = 0; i < nCells; i++) {
         Cell* cell = cells[i];
 #ifdef WRITE_BUFFER
