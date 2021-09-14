@@ -37,6 +37,7 @@ class ViaType;
 class Region;
 class NDR;
 class SNet;
+class Site;
 class PowerNet;
 class EdgeTypes;
 class GCell;
@@ -55,6 +56,7 @@ class Placement;
 #include "db_region.h"
 #include "db_route.h"
 #include "db_row.h"
+#include "db_site.h"
 #include "db_snet.h"
 #include "db_td.h"
 #include "db_via.h"
@@ -95,6 +97,7 @@ public:
     unordered_map<string, ViaType*> name_viatypes;
 
     vector<Layer> layers;
+    vector<Site> sites;
     vector<ViaType*> viatypes;
     vector<CellType*> celltypes;
 
@@ -154,6 +157,7 @@ public:
     void clearDesign();
 
     Layer& addLayer(const string& name, const char type = 'x');
+    Site& addSite(const string& name, const string& siteClassName, const int w, const int h);
     ViaType* addViaType(const string& name, bool isDef);
     inline ViaType* addViaType(const string& name) { return addViaType(name, false); }
     CellType* addCellType(const string& name, unsigned libcell);

@@ -47,9 +47,9 @@ namespace db{
             void clear(){
                 _placement.clear();
             }
-            int x(Cell *cell) const {
-                return _placement.at(cell).x();
-                //return _placement[cell].x();
+            int x(Cell *cell) {
+                // return _placement.at(cell).x();
+                return _placement[cell].x();
             }
             int y(Cell *cell) {
                 return _placement[cell].y();

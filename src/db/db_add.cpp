@@ -23,6 +23,17 @@ Layer& Database::addLayer(const string& name, const char type) {
     return newlayer;
 }
 
+Site& Database::addSite(const string& name, const string& siteClassName, const int w, const int h) {
+    for (unsigned i = 0; i < sites.size(); i++) {
+        if (name == sites[i].name()) {
+            printlog(LOG_WARN, "site re-defined: %s", name.c_str());
+            return sites[i];
+        }
+    }
+    sites.emplace_back(name, siteClassName, w, h);
+    return sites.back();
+}
+
 ViaType* Database::addViaType(const string& name, bool isDef) {
     ViaType* viatype = getViaType(name);
     if (viatype) {
