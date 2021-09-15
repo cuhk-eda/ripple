@@ -48,11 +48,12 @@ namespace db{
                 _placement.clear();
             }
             int x(Cell *cell) {
-                // return _placement.at(cell).x();
-                return _placement[cell].x();
+                return _placement.at(cell).x();
+                // return _placement[cell].x();
             }
             int y(Cell *cell) {
-                return _placement[cell].y();
+                return _placement.at(cell).y();
+                // return _placement[cell].y();
             }
             int flipX(Cell *cell) {
                 return _placement[cell].flipX();
