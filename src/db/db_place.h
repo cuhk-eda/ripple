@@ -47,11 +47,11 @@ namespace db{
             void clear(){
                 _placement.clear();
             }
-            int x(Cell *cell) {
+            int x(Cell *cell) const {
                 return _placement.at(cell).x();
                 // return _placement[cell].x();
             }
-            int y(Cell *cell) {
+            int y(Cell *cell) const {
                 return _placement.at(cell).y();
                 // return _placement[cell].y();
             }
