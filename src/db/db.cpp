@@ -167,6 +167,24 @@ void Database::SetupFloorplan() {
         coreHX = std::max(row->x() + (int)row->width(), coreHX);
         coreHY = std::max(row->y() + siteH, coreHY);
     }
+
+    for (Site& site : sites) {
+        if (site.siteClassName() == "CORE") {
+            if (siteW != (unsigned)site.width()) {
+                printlog(LOG_WARN,
+                         "siteW %d in DEF is inconsistent with siteW %d in LEF.",
+                         static_cast<int>(siteW),
+                         static_cast<int>(site.width()));
+            }
+            if (siteH != site.height()) {
+                printlog(LOG_WARN,
+                         "siteH %d in DEF is inconsistent with siteH %d in LEF.",
+                         static_cast<int>(siteH),
+                         static_cast<int>(site.height()));
+            }
+            break;
+        }
+    }
 }
 
 void Database::SetupRegions() {

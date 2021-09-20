@@ -48,9 +48,15 @@ int Ripple::_run(int argc, char** argv) {
                 Shell::proc("load");
                 database.setup();
                 database.errorCheck();
-                printlog(LOG_INFO, "wirelength = %.2lf (scale=%.2lf)", (double)database.getHPWL() / (double)database.siteW);
+                printlog(LOG_INFO,
+                         "wirelength = %.2lf (scale=%.2lf)",
+                         (double)database.getHPWL() / (double)database.siteW,
+                         (double)database.siteW);
                 Shell::proc("gplace");
-                printlog(LOG_INFO, "wirelength = %.2lf (scale=%.2lf)", (double)database.getHPWL() / (double)database.siteW);
+                printlog(LOG_INFO,
+                         "wirelength = %.2lf (scale=%.2lf)",
+                         (double)database.getHPWL() / (double)database.siteW,
+                         (double)database.siteW);
                 dp::DPModule::MaxDisp = database.maxDisp * database.siteH / database.siteW;
                 dp::DPModule::MaxDensity = database.maxDensity;
                 Shell::proc("dplace");

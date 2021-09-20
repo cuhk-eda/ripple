@@ -167,7 +167,7 @@ bool Database::readLEF(const std::string& file) {
     lefrSetMacroEndCbk(readLefMacroEnd);
     lefrInit();
     lefrReset();
-    int res = lefrRead(fp, file.c_str(), (void*)&database);
+    int res = lefrRead(fp, file.c_str(), (void*)this);
     if (res) {
         printlog(LOG_ERROR, "Error in reading LEF");
         return false;
@@ -220,7 +220,7 @@ bool Database::readDEF(const std::string& file) {
 
     defrInit();
     defrReset();
-    int res = defrRead(fp, file.c_str(), (void*)&database, 1);
+    int res = defrRead(fp, file.c_str(), (void*)this, 1);
     if (res) {
         printlog(LOG_ERROR, "Error in reading DEF");
         return false;
@@ -963,7 +963,12 @@ int readLefPin(lefrCallbackType_e c, lefiPin* pin, lefiUserData ud) {
 }
 
 int readLefSite(lefrCallbackType_e c, lefiSite* site, lefiUserData ud) {
-    printlog(LOG_INFO, "site name: %s", site->name());
+    Database* db = reinterpret_cast<Database*>(ud);
+    int convertFactor = db->LefConvertFactor;
+    int width = lround(site->sizeX() * convertFactor);
+    int height = lround(site->sizeY() * convertFactor);
+    printlog(LOG_INFO, "site name: %s class: %s siteW: %d siteH: %d", site->name(), site->siteClass(), width, height);
+    db->addSite(site->name(), site->siteClass(), width, height);
     return 0;
 }
 
@@ -1216,14 +1221,20 @@ int readDefPin(defrCallbackType_e c, defiPin* dpin, defiUserData ud) {
     Database* db = (Database*)ud;
 
     char direction = 'x';
-    if (!strcmp(dpin->direction(), "INPUT")) {
-        // INPUT to the chip, output from external
-        direction = 'o';
-    } else if (!strcmp(dpin->direction(), "OUTPUT")) {
-        // OUTPUT to the chip, input to external
-        direction = 'i';
-    } else {
-        printlog(LOG_WARN, "unknown pin signal direction: %s", dpin->direction());
+    if (dpin->direction()) {
+        if (!strcmp(dpin->direction(), "INPUT")) {
+            // INPUT to the chip, output from external
+            direction = 'o';
+        } else if (!strcmp(dpin->direction(), "OUTPUT")) {
+            // OUTPUT to the chip, input to external
+            direction = 'i';
+        } else {
+            printlog(LOG_WARN, "unknown pin signal direction: %s", dpin->direction());
+        }
+    }
+    else {
+        string pinName(dpin->pinName());
+        printlog(LOG_WARN, "Pin %s has no pin signal direction", pinName.c_str());
     }
 
     IOPin* iopin = db->addIOPin(string(dpin->pinName()), string(dpin->netName()), direction);
@@ -1482,6 +1493,11 @@ int readDefNet(defrCallbackType_e c, defiNet* dnet, defiUserData ud) {
         if (!ndr) {
             printlog(LOG_WARN, "NDR rule is not defined: %s", designrulename.c_str());
         }
+    }
+    if ((unsigned)dnet->numConnections() == 0) {
+        string netName(dnet->name());
+        printlog(LOG_WARN, "Net %s is 0-Pin net. Ignore.", netName.c_str());
+        return 0;
     }
 
     Net* net = db->addNet(dnet->name(), ndr);
